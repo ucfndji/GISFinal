@@ -1,0 +1,85 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+library(maptools)
+library(RColorBrewer)
+library(classInt)
+library(OpenStreetMap)
+library(sp)
+library(rgeos)
+library(tmap)
+library(tmaptools)
+library(sf)
+library(rgdal)
+library(tidyverse)
+library(methods)
+library(shinyjs)
+ScotlandMap <- read_shape("ScotlandData/scotland_ca_2010.shp", as.sf = TRUE)
+ScotlandData<-read.csv("Health/healthcondition.csv")
+class(ScotlandData)
+datatypelist<-data.frame(cbind(lapply(ScotlandData,class)))
+ScotlandData <- edit(ScotlandData)
+names(ScotlandData)
+ScotlandMap<- append_data(ScotlandMap,ScotlandData, key.shp = "code", key.data = "GEO_CODE", ignore.duplicates = TRUE)
+tmap_mode("plot")
+Scotland_osm <- read_osm(ScotlandMap, type = "esri", zoom = NULL)
+qtm(Scotland_osm) + 
+  tm_shape(ScotlandMap) + 
+  tm_polygons("Very.bad.health", 
+              style="jenks",
+              palette="YlOrRd",
+              midpoint=NA,
+              title="number of people ",
+              alpha = 0.5) + 
+  tm_compass(position = c("left", "top"),type = "arrow") + 
+  tm_scale_bar(position = c("left", "top")) +
+  tm_layout(title = "Health of the Scottish people", legend.position = c("left", "bottom"))
+
+Scotland_osm <- read_osm(ScotlandMap, type = "esri", zoom = NULL)
+qtm(Scotland_osm) + 
+  tm_shape(ScotlandMap) +
+  tm_polygons(c("Very.bad.health", "Very.good.health"),
+              style=c("jenks", "pretty"),
+              palette=list("YlOrRd", "PuRd"),
+              auto.palette.mapping=FALSE,
+              title=c( "people who have very bad health","people who have very good health"),
+              alpha = 0.5) +
+  tm_compass(position = c("left", "top"),type = "arrow") + 
+  tm_scale_bar(position = c("left", "top")) +
+  tm_layout(title = "Health of the Scottish people", legend.position = c("left", "bottom"))
+  
+
+```
+
+![](Part1-R.png)
+
+![](Part1-ArcMap.png)
+
+Part one
+Word count: 607 words
+This article compares the advantages and disadvantages of two commonly used software for Geographic Information System (GIS), ArcMap and R, which are based on GUI and code separately. ArcMap is GUI-based software, which highlights interaction with the user and focuses on how users feel. To be more specific, the graphical user interface makes it is possible for users to interact with electronic devices through graphical and visual tools, rather than pure text-based user interfaces or typed command lines. 
+Data collection
+Both ArcMap and R select the map of Scotland as the research object, which is downloaded from UK Data Service. The OpenStreetMap provide information about the people's health condition, which can be seen in the table below.
+ 
+Workflow used to generate a map in ArcMap
+
+In ArcMap, users need to create geodatabase at the beginning, which will be able to store attribute information of map as a folder in the file system to link to spatial data. Through changing the properties of the Scotland map, the health of Scottish people can be reflected clearly in different colour.
+
+Workflow used to generate a map in R
+
+Before we begin our work in R, "maptools" package should be installed, which enables the shapefile of Scotland map to be read into R. The dataset of health can be imported directly by using "read.csv" function. Next, "tamp" and "tmaptools" make it possible to classify the map according to the different health condition. There is one issue in R need to be mentioned, packages are likely to be installed unsuccessfully in a different version of R and these packages need to be updated frequently. 
+
+Comparing the benefits and drawbacks of ArcMap and R
+
+Compared with GUI-based software, some users are likely to have difficulty in understanding the command in R. However, R can help users improve work efficiency and save working time. Since all data is processed by code, it is convenient to copy the command and perform the same operation on other similar datasets, while users have to repeat these stages again in ArcMap, which means they have more risk to make mistakes. Take the plot of R as an example, we are able to do several pictures at the same time by simply changing the color code, while we need to repeat each step in ArcMap. 
+The way of data view is also different. If users want to check the data, they have to open attributable table of each layer. In comparison, the data in R is listed in the environment, it is convenient to open the file when we need. A user will be able to open several sets of data at the same time and compare them clearly and intuitively. 
+Next comes to the way of data manipulation. It is a truth that users may prefer to choose R when they face some complex data, considering the convenience of using the command to acquire useful dataset in R. on the contrary, it is difficult to modify errors in ArcMap. In R, users will be able to summarise the data easily to examining the data by using "summary" function. However, ArcMap only has some basic analytic function, such as rank data. In addition, we can obtain the relationship between two groups of data through the plot of them. Furthermore, it is possible to produce many kinds of maps in R, not only maps. 
+In conclusion, both R and ArcMap are great tools to produce maps which contain many attributes. For those who focus on the interaction, they may prefer to choose ArcMap, while R is more suitable for those who process similar dataset or carry out similar analysis tasks.
+
